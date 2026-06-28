@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { playHapticSound } from './ConsoleWidget';
 
 export default function Navbar({ activeSection }) {
   const [isOpen, setIsOpen] = useState(false);
+  const navRef = useRef(null);
 
   const navLinks = [
     { href: '#hero', label: 'home' },
@@ -23,8 +24,22 @@ export default function Navbar({ activeSection }) {
     setIsOpen(!isOpen);
   };
 
+  const handleMouseMove = (e) => {
+    if (!navRef.current) return;
+    const rect = navRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    navRef.current.style.setProperty('--mouse-x', `${x}px`);
+    navRef.current.style.setProperty('--mouse-y', `${y}px`);
+  };
+
   return (
-    <nav id="nav" onMouseEnter={() => playHapticSound('hover')}>
+    <nav 
+      id="nav" 
+      ref={navRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => playHapticSound('hover')}
+    >
       <a href="#hero" className="nav-logo" onClick={() => playHapticSound('click')}>
         <img src="/logo.png" alt="Logo" />
       </a>

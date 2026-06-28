@@ -9,9 +9,22 @@ export default function Terminal() {
   ]);
   const [inputVal, setInputVal] = useState('');
   const terminalEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const isFirstRender = useRef(true);
 
-  // Auto scroll to bottom of terminal
+  // Focus input on mount without scrolling the viewport
   useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  }, []);
+
+  // Auto scroll to bottom of terminal (only on subsequent command entries)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (terminalEndRef.current) {
       terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -156,13 +169,13 @@ export default function Terminal() {
           <span className="term-user-prefix">visitor@arpitumrao:~$ </span>
           <input
             id="term-input"
+            ref={inputRef}
             type="text"
             className="term-input font-mono"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
             autoComplete="off"
-            autoFocus
           />
         </div>
         <div ref={terminalEndRef} />
