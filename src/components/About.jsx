@@ -31,7 +31,7 @@ export default function About() {
               <div className="id-row"><span className="ik">name</span><span className="iv">Arpit Umrao</span></div>
               <div className="id-row"><span className="ik">role</span><span className="iv">Backend Developer</span></div>
               <div className="id-row"><span className="ik">location</span><span className="iv">Kanpur, UP</span></div>
-              <div className="id-row"><span className="ik">type</span><span className="iv">Fresher · 2024 Grad</span></div>
+              <div className="id-row"><span className="ik">type</span><span className="iv">Student · 2028 Grad</span></div>
               <div className="id-row">
                 <span className="ik">status</span>
                 <span className="iv live"><span className="gd"></span>Open to Work</span>
@@ -41,9 +41,9 @@ export default function About() {
           
           <div>
             <div className="about-txt">
-              <p>I'm a recent Computer Science graduate from Pranveer Singh Institute of Technology, Kanpur, with a strong focus on Java backend development. I love the challenge of building reliable enterprise systems, structured databases, and clean server-side logic that operates seamlessly under the hood.</p>
-              <p>During college I built RESTful APIs using Spring Boot, designed relational database schemas, and worked with enterprise Java technologies like Servlets, JSP, and Spring Security. I also utilize Python for data analysis (Pandas, NumPy). That hands-on experience gave me a solid foundation in software patterns and system design.</p>
-              <p>I'm actively looking for my first professional role where I can contribute to core server engines, write clean Java code, and grow alongside senior developers.</p>
+              <p>I'm a Computer Science undergraduate at Pranveer Singh Institute of Technology, Kanpur (Class of 2028), specializing in Java backend development. I love the challenge of building reliable enterprise systems, structured databases, and clean server-side logic that operates seamlessly under the hood.</p>
+              <p>Through my coursework and active projects, I build RESTful APIs using Spring Boot, design relational database schemas, and work with enterprise Java technologies like Servlets, JSP, and Spring Security. I also utilize Python for data analysis (Pandas, NumPy) to establish a solid foundation in software patterns and system design.</p>
+              <p>I'm actively looking for internship opportunities and developer roles where I can contribute to core server engines, write clean Java code, and grow alongside senior engineers.</p>
             </div>
             
             <div className="vals">
