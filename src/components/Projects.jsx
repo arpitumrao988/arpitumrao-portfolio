@@ -5,6 +5,8 @@ import { playHapticSound } from './ConsoleWidget';
 export default function Projects() {
   const [filter, setFilter] = useState('All');
   const [view, setView] = useState('grid'); // 'grid' or 'list'
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showNoHostModal, setShowNoHostModal] = useState(false);
 
   const projectsList = [
     {
@@ -15,7 +17,8 @@ export default function Projects() {
       tags: ['Java', 'Spring Boot', 'React', 'Python', 'Scikit-learn'],
       category: 'Java',
       featured: true,
-      github: 'https://github.com/arpitumrao988',
+      github: 'https://github.com/arpitumrao988/Smart-Crop-Advisor',
+      live: null,
       colorClass: 'card-green'
     },
     {
@@ -26,7 +29,8 @@ export default function Projects() {
       tags: ['Java', 'Spring Boot', 'Python', 'Pandas', 'MySQL'],
       category: 'Java',
       featured: true,
-      github: 'https://github.com/arpitumrao988',
+      github: 'https://github.com/Shadow-atomic777/Book_Recommendation',
+      live: null,
       colorClass: 'card-blue'
     },
     {
@@ -37,7 +41,8 @@ export default function Projects() {
       tags: ['React', 'Vite', 'CSS', 'JavaScript'],
       category: 'React',
       featured: false,
-      github: 'https://github.com/arpitumrao988',
+      github: 'https://github.com/arpitumrao988/arpitumrao-portfolio',
+      live: 'https://arpitumrao-portfolio.vercel.app/',
       colorClass: 'card-purple'
     }
   ];
@@ -50,6 +55,18 @@ export default function Projects() {
   const handleViewChange = (newView) => {
     playHapticSound('beep');
     setView(newView);
+  };
+
+  const handleExecuteClick = (e, p) => {
+    e.preventDefault();
+    if (!p.live) {
+      playHapticSound('error');
+      setSelectedProject(p);
+      setShowNoHostModal(true);
+    } else {
+      playHapticSound('success');
+      window.open(p.live, '_blank', 'noopener,noreferrer');
+    }
   };
 
   // Filter project lists
@@ -116,6 +133,18 @@ export default function Projects() {
                       </svg>
                       GitHub
                     </a>
+                    <a 
+                      href={p.live || '#'} 
+                      target={p.live ? "_blank" : undefined}
+                      rel={p.live ? "noopener noreferrer" : undefined}
+                      className="pl" 
+                      onClick={(e) => handleExecuteClick(e, p)}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '4px' }}>
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                      </svg>
+                      Execute
+                    </a>
                   </div>
                 </div>
                 <div className="ptitle">{p.title}</div>
@@ -152,7 +181,13 @@ export default function Projects() {
                     {p.tags.join(' / ')}
                   </div>
                   <div className="col-actions">
-                    <a href={p.github} target="_blank" rel="noopener noreferrer" className="list-link" onClick={() => playHapticSound('click')}>
+                    <a 
+                      href={p.live || '#'} 
+                      target={p.live ? "_blank" : undefined}
+                      rel={p.live ? "noopener noreferrer" : undefined}
+                      className="list-link" 
+                      onClick={(e) => handleExecuteClick(e, p)}
+                    >
                       EXECUTE
                     </a>
                   </div>
@@ -162,6 +197,54 @@ export default function Projects() {
           </div>
         )}
       </div>
+
+      {/* Sci-Fi Glassmorphic No-Host Modal */}
+      {showNoHostModal && selectedProject && (
+        <div className="resume-modal-overlay" onClick={() => setShowNoHostModal(false)}>
+          <div className="resume-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="resume-modal-header" style={{ borderBottomColor: 'rgba(239, 68, 68, 0.2)' }}>
+              <span className="modal-header-icon" style={{ color: '#ef4444' }}>⚠️</span>
+              <span className="modal-header-title font-mono" style={{ color: '#ef4444' }}>STATUS // HOSTING_UNAVAILABLE</span>
+              <button className="modal-close-btn" onClick={() => setShowNoHostModal(false)}>×</button>
+            </div>
+            <div className="resume-modal-body">
+              <div className="modal-alert-icon">🗄️</div>
+              <h3 className="modal-alert-heading">Local Backend Engine Only</h3>
+              <p className="modal-alert-text">
+                The project <strong>"{selectedProject.title}"</strong> is a backend system or application layer that does not have a public hosted frontend. You can inspect the source code, configurations, and database integrations directly in the GitHub repository.
+              </p>
+              <div className="modal-alert-log font-mono">
+                <div>[!] TARGET: {selectedProject.title}</div>
+                <div>[!] STATUS: LOCAL_ENGINE_ONLY</div>
+                <div>[!] REPO: {selectedProject.github}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <button 
+                  className="btn-g" 
+                  style={{ flex: 1, justifyContent: 'center', cursor: 'pointer', height: '42px', border: '1px solid var(--line-strong)' }} 
+                  onClick={() => setShowNoHostModal(false)}
+                >
+                  Close Notice
+                </button>
+                <button 
+                  className="btn-p" 
+                  style={{ flex: 1.5, justifyContent: 'center', cursor: 'pointer', height: '42px', border: 'none' }} 
+                  onClick={() => {
+                    playHapticSound('success');
+                    window.open(selectedProject.github, '_blank', 'noopener,noreferrer');
+                    setShowNoHostModal(false);
+                  }}
+                >
+                  Inspect Repository
+                  <svg viewBox="0 0 24 24" width="14" height="14" style={{ marginLeft: '6px' }}>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
