@@ -99,15 +99,17 @@ function RealHeatmap({ activityData = {}, baseColor }) {
 export default function Journey() {
   const [openCard, setOpenCard] = useState(null);
   const [activeHrBadge, setActiveHrBadge] = useState(null);
+  const [lcError, setLcError] = useState(false);
+  const [ghError, setGhError] = useState(false);
 
   // LeetCode Stats State
   const [lcStats, setLcStats] = useState({
-    solved: 94,
-    easy: 53,
+    solved: 96,
+    easy: 55,
     medium: 36,
     hard: 5,
-    rank: 1645514,
-    points: 165,
+    rank: 1624047,
+    points: 178,
     activity: {}
   });
 
@@ -128,37 +130,84 @@ export default function Journey() {
     setOpenCard(openCard === cardId ? null : cardId);
   };
 
-  // Fetch LeetCode Real Data
+  // Fetch LeetCode Real Data (with multi-stage backup proxy handling)
   useEffect(() => {
     async function fetchLeetCodeData() {
+      const username = 'arpitumrao';
+      let solved = 96;
+      let easy = 55;
+      let medium = 36;
+      let hard = 5;
+      let rank = 1624047;
+      let points = 178;
+      let activity = {};
+      let fetchSuccessful = false;
+
+      // Stage 1: Try Faisal Shohag's API
       try {
-        const username = 'arpitumrao';
         const res = await fetch(`https://leetcode-api-faisalshohag.vercel.app/${username}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        
-        // Parse solved counts
-        const solved = data.totalSolved || 94;
-        const easy = data.easySolved || 53;
-        const medium = data.mediumSolved || 36;
-        const hard = data.hardSolved || 5;
-        const rank = data.ranking || 1645514;
-        const points = data.contributionPoint || 165;
+        if (res.ok) {
+          const data = await res.json();
+          solved = data.totalSolved || solved;
+          easy = data.easySolved || easy;
+          medium = data.mediumSolved || medium;
+          hard = data.hardSolved || hard;
+          rank = data.ranking || rank;
+          points = data.contributionPoint || points;
 
-        // Parse LeetCode submissionCalendar timestamps into YYYY-MM-DD
-        const activity = {};
-        if (data.submissionCalendar) {
-          Object.keys(data.submissionCalendar).forEach((timestamp) => {
-            const date = new Date(parseInt(timestamp) * 1000);
-            const dateString = getLocalDateString(date); // format YYYY-MM-DD (timezone-safe)
-            activity[dateString] = (activity[dateString] || 0) + data.submissionCalendar[timestamp];
-          });
+          if (data.submissionCalendar) {
+            Object.keys(data.submissionCalendar).forEach((timestamp) => {
+              const date = new Date(parseInt(timestamp) * 1000);
+              const dateString = getLocalDateString(date);
+              activity[dateString] = (activity[dateString] || 0) + data.submissionCalendar[timestamp];
+            });
+            fetchSuccessful = true;
+          }
         }
-
-        setLcStats({ solved, easy, medium, hard, rank, points, activity });
       } catch (err) {
-        console.warn("LeetCode API error, using static fallback:", err);
+        console.warn("LeetCode Faisal Shohag API failed, attempting backup...", err);
       }
+
+      // Stage 2: If primary API failed, try Alfa LeetCode API (Solved + Calendar)
+      if (!fetchSuccessful) {
+        try {
+          // 1. Fetch Solved stats
+          const solvedRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/solved`);
+          if (solvedRes.ok) {
+            const solvedData = await solvedRes.json();
+            solved = solvedData.solvedProblem || solved;
+            easy = solvedData.easySolved || easy;
+            medium = solvedData.mediumSolved || medium;
+            hard = solvedData.hardSolved || hard;
+          }
+
+          // 2. Fetch Calendar stats
+          const calRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/calendar`);
+          if (calRes.ok) {
+            const calData = await calRes.json();
+            let submissionCalendar = calData.submissionCalendar;
+            if (typeof submissionCalendar === 'string') {
+              submissionCalendar = JSON.parse(submissionCalendar);
+            }
+            if (submissionCalendar) {
+              Object.keys(submissionCalendar).forEach((timestamp) => {
+                const date = new Date(parseInt(timestamp) * 1000);
+                const dateString = getLocalDateString(date);
+                activity[dateString] = (activity[dateString] || 0) + submissionCalendar[timestamp];
+              });
+              fetchSuccessful = true;
+            }
+          }
+        } catch (err) {
+          console.warn("LeetCode Alfa API failed, keeping static fallback:", err);
+        }
+      }
+
+      // Update state with whatever succeeded (or defaults)
+      if (!fetchSuccessful) {
+        setLcError(true);
+      }
+      setLcStats({ solved, easy, medium, hard, rank, points, activity });
     }
 
     fetchLeetCodeData();
@@ -172,12 +221,18 @@ export default function Journey() {
         
         // 1. Fetch GitHub user basic profile info
         const userRes = await fetch(`https://api.github.com/users/${username}`);
-        if (!userRes.ok) return;
+        if (!userRes.ok) {
+          setGhError(true);
+          return;
+        }
         const userData = await userRes.json();
 
         // 2. Fetch repositories to calculate languages and stars
         const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
-        if (!reposRes.ok) return;
+        if (!reposRes.ok) {
+          setGhError(true);
+          return;
+        }
         const reposData = await reposRes.json();
         const totalStars = reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0);
 
@@ -239,6 +294,7 @@ export default function Journey() {
         });
       } catch (err) {
         console.warn("GitHub API error, using static fallback:", err);
+        setGhError(true);
       }
     }
 
@@ -275,6 +331,12 @@ export default function Journey() {
               <div className="pf-inner">
                 {openCard === 'lc' && (
                   <div className="pf-content">
+                    {lcError && (
+                      <div className="platform-offline-banner font-mono">
+                        [!] NOTE: API server latency timeout. Displaying local data core backup.
+                      </div>
+                    )}
+                    
                     <div className="pf-stats">
                       <div className="ps">
                         <div className="ps-n"><AnimatedCounter targetValue={lcStats.solved} /></div>
@@ -356,6 +418,12 @@ export default function Journey() {
               <div className="pf-inner">
                 {openCard === 'gh' && (
                   <div className="pf-content">
+                    {ghError && (
+                      <div className="platform-offline-banner font-mono">
+                        [!] NOTE: API server latency timeout. Displaying local data core backup.
+                      </div>
+                    )}
+                    
                     <div className="pf-stats">
                       <div className="ps">
                         <div className="ps-n"><AnimatedCounter targetValue={ghStats.repos} /></div>

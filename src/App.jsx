@@ -8,10 +8,21 @@ import Journey from './components/Journey';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import ConsoleWidget from './components/ConsoleWidget';
-
+import ConsoleWidget, { playHapticSound } from './components/ConsoleWidget';
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
+  const [showMobileToast, setShowMobileToast] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile viewport to trigger Cyber Toast alert
+    if (window.innerWidth <= 860) {
+      const timer = setTimeout(() => {
+        setShowMobileToast(true);
+        playHapticSound('error');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     // 1. Mouse coordinate tracking for 3D cursor-glows
@@ -148,6 +159,21 @@ export default function App() {
       </main>
       <Footer />
       <ConsoleWidget />
+
+      {showMobileToast && (
+        <div className="mobile-cyber-toast font-mono">
+          <div className="toast-header">
+            <span className="toast-tag">// SYSTEM_NOTICE</span>
+            <button className="toast-close" onClick={() => {
+              setShowMobileToast(false);
+              playHapticSound('click');
+            }}>×</button>
+          </div>
+          <div className="toast-body">
+            [!] Interactive CLI Terminal is hidden on mobile viewports. View this portfolio on a Windows/macOS desktop to experience the full developer console dashboard!
+          </div>
+        </div>
+      )}
     </>
   );
 }
