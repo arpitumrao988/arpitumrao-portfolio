@@ -2,7 +2,7 @@
 
 A component-based, highly responsive, and futuristic developer portfolio designed with a sophisticated light-tech HUD dashboard and an **interactive CLI terminal**. Tailored for enterprise Java backend engineering and student graduation timelines.
 
-🔗 **Live Site:** [[https://arpitumrao.vercel.app](https://arpitumrao-portfolio.vercel.app/)]
+🔗 **Live Site:** [[(https://arpitumrao-portfolio.vercel.app/)](https://arpitumrao-portfolio.vercel.app/)]
 
 ---
 
